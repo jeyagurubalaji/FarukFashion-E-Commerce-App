@@ -1,6 +1,6 @@
 class AppConstants {
   // Change this to my backend URL
-  static const String baseUrl = 'http://localhost:8080/api';
+  static const String baseUrl = 'https://farukfashion-express.vercel.app/api';
   // static const String baseUrl = 'http://10.0.2.2:8080/api';
   // static const String baseUrl = 'http://192.168.1.10:8080/api';
 
