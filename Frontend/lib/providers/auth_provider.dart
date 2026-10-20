@@ -80,56 +80,57 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-    Future<bool> loginWithGoogle() async {
-      _isLoading = true;
-      _error = null;
-      notifyListeners();
+  Future<bool> loginWithGoogle() async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+    try {
+      // Configure GoogleSignIn with explicit serverClientId for Android release builds
+      final googleSignIn = GoogleSignIn(
+        serverClientId: '788219758793-92vdb8hopvdq38laal2agsoj9gudp0fm.apps.googleusercontent.com',
+        scopes: const ['email', 'profile', 'openid'],
+      );
+
       try {
-        final googleSignIn = GoogleSignIn(
-          clientId: AppConstants.googleClientId,
-          scopes: const ['email', 'profile', 'openid'],
-        );
+        await googleSignIn.signOut();
+      } catch (_) {}
 
-        try {
-          await googleSignIn.signOut();
-        } catch (_) {}
-
-        final account = await googleSignIn.signIn();
-        if (account == null) {
-          _error = 'Google sign-in cancelled';
-          _isLoading = false;
-          notifyListeners();
-          return false;
-        }
-
-        final gAuth = await account.authentication;
-        final idToken = gAuth.idToken;
-        final accessToken = gAuth.accessToken;
-
-        if ((idToken == null || idToken.isEmpty) &&
-            (accessToken == null || accessToken.isEmpty)) {
-          throw Exception(
-            'Google returned no tokens. Check client ID origins and COOP headers.',
-          );
-        }
-
-        final data = await _api.googleLogin(
-          idToken: idToken,
-          accessToken: accessToken,
-          email: account.email,
-          displayName: account.displayName,
-        );
-        await _saveSession(data);
-        _isLoading = false;
-        notifyListeners();
-        return true;
-      } catch (e) {
-        _error = e.toString().replaceAll('Exception: ', '');
+      final account = await googleSignIn.signIn();
+      if (account == null) {
+        _error = 'Google sign-in cancelled';
         _isLoading = false;
         notifyListeners();
         return false;
       }
+
+      final gAuth = await account.authentication;
+      final idToken = gAuth.idToken;
+      final accessToken = gAuth.accessToken;
+
+      if ((idToken == null || idToken.isEmpty) &&
+          (accessToken == null || accessToken.isEmpty)) {
+        throw Exception(
+          'Google returned no tokens. Check client ID origins and COOP headers.',
+        );
+      }
+
+      final data = await _api.googleLogin(
+        idToken: idToken,
+        accessToken: accessToken,
+        email: account.email,
+        displayName: account.displayName,
+      );
+      await _saveSession(data);
+      _isLoading = false;
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _error = e.toString().replaceAll('Exception: ', '');
+      _isLoading = false;
+      notifyListeners();
+      return false;
     }
+  }
 
   Future<void> _saveSession(Map<String, dynamic> data) async {
     final token = data['accessToken'] as String;
@@ -148,7 +149,9 @@ class AuthProvider with ChangeNotifier {
 
   Future<void> logout() async {
     try {
-      await GoogleSignIn(clientId: AppConstants.googleClientId).signOut();
+      await GoogleSignIn(
+        serverClientId: '788219758793-92vdb8hopvdq38laal2agsoj9gudp0fm.apps.googleusercontent.com',
+      ).signOut();
     } catch (_) {}
     await _storage.delete(key: AppConstants.tokenKey);
     final prefs = await SharedPreferences.getInstance();
