@@ -16,7 +16,7 @@ class AppConstants {
   static const String usernameKey = 'ff_username';
   static const String fullNameKey = 'ff_full_name';
   static const String googleClientId =
-      '479760002250-s4cjk50u27i1mto75rc3kkrb0akeauns.apps.googleusercontent.com';
+        '788219758793-92vdb8hopvdq38laal2agsoj9gudp0fm.apps.googleusercontent.com';
   /// Shop by Category (includes All)
   static const List<Map<String, String>> categories = [
     {'code': '', 'name': 'All', 'icon': '✨'},
