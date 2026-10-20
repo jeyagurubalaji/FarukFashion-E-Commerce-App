@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
@@ -18,8 +19,16 @@ import 'screens/auth/reset_password_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Mandatory: Initialize Firebase before running the app to prevent startup crashes
-  await Firebase.initializeApp();
+  try {
+    if (kIsWeb) {
+      // Safe web initialization (or pass options if you generated firebase_options.dart)
+      await Firebase.initializeApp();
+    } else {
+      await Firebase.initializeApp();
+    }
+  } catch (e) {
+    debugPrint("Firebase init error: $e");
+  }
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
