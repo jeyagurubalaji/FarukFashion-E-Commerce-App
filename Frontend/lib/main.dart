@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
@@ -19,15 +18,11 @@ import 'screens/auth/reset_password_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Safely initialize Firebase without crashing app startup if config is absent
   try {
-    if (kIsWeb) {
-      // Safe web initialization (or pass options if you generated firebase_options.dart)
-      await Firebase.initializeApp();
-    } else {
-      await Firebase.initializeApp();
-    }
+    await Firebase.initializeApp();
   } catch (e) {
-    debugPrint("Firebase init error: $e");
+    debugPrint("Firebase initialization note: $e");
   }
 
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
@@ -91,7 +86,12 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _boot() async {
-    await context.read<AuthProvider>().tryAutoLogin();
+    try {
+      await context.read<AuthProvider>().tryAutoLogin();
+    } catch (e) {
+      debugPrint("Auto-login note: $e");
+    }
+
     await Future.delayed(const Duration(milliseconds: 1200));
     if (!mounted) return;
 
